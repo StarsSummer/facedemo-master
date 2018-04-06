@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -27,6 +28,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private Uri mPath;
 
+    private MySqliteHelper helper;
+
     /* (non-Javadoc)
      * @see android.app.Activity#onCreate(android.os.Bundle)
      */
@@ -43,12 +46,12 @@ public class MainActivity extends Activity implements OnClickListener {
 
     /* (non-Javadoc)
      * @see android.app.Activity#onDestroy()
-     */
-    @Override
-    protected void onDestroy() {
-        // TODO Auto-generated method stub
-        super.onDestroy();
-    }
+//     */
+//    @Override
+//    protected void onDestroy() {
+//        // TODO Auto-generated method stub
+//        super.onDestroy();
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -86,7 +89,8 @@ public class MainActivity extends Activity implements OnClickListener {
         switch (paramView.getId()) {
             case R.id.button2:
                 //获取Application里非静态变量
-                if (((Application) getApplicationContext()).mFaceDB.mRegister.isEmpty()) {
+                //if (((Application) getApplicationContext()).mFaceDB.mRegister.isEmpty()) {
+                if(Nofacesyet()){
                     Toast.makeText(this, "没有注册人脸，请先注册！", Toast.LENGTH_SHORT).show();
                 } else {
                     new AlertDialog.Builder(this)
@@ -239,6 +243,14 @@ public class MainActivity extends Activity implements OnClickListener {
         Intent it = new Intent(MainActivity.this, DetecterActivity.class);
         it.putExtra("Camera", camera);
         startActivityForResult(it, REQUEST_CODE_OP);
+    }
+
+    private boolean Nofacesyet(){
+        helper = new MySqliteHelper(getApplicationContext());
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String sql1 = "select * from users";
+        Cursor cursor = db.rawQuery(sql1, null);
+        return false;
     }
 }
 

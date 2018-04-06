@@ -1,5 +1,6 @@
 package com.zeroingin.x.facedemo;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.arcsoft.facerecognition.AFR_FSDKEngine;
@@ -148,6 +149,8 @@ public class FaceDB {
     public void addFace(String name,String status, AFR_FSDKFace face) {
         try {
             //check if already registered.
+
+
             boolean add = true;
             boolean isSame = false;
             for (FaceRegist frface : mRegister) {
@@ -169,6 +172,8 @@ public class FaceDB {
                 FaceRegist frface = new FaceRegist(name,status);
                 frface.mFaceList.add(face);
                 mRegister.add(frface);
+
+
             }
 
             if (!isSame) {  //重复特征则不保存信息

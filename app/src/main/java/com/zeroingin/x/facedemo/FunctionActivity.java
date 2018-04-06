@@ -51,6 +51,22 @@ public class FunctionActivity extends Activity implements View.OnClickListener{
                 chatintent.putExtra("name",name);
                 startActivity(chatintent);
                 break;
+            case  R.id.Button_veri:
+                Intent camintent = new Intent(FunctionActivity.this,DetecterActivity.class);
+                startActivity(camintent);
+                break;
+            case  R.id.Button_anno:
+                Intent annintent = new Intent(FunctionActivity.this,AnnoActivity.class);
+                annintent.putExtra("role",role);
+                annintent.putExtra("name",name);
+                startActivity(annintent);
+                break;
+            case R.id.Button_self:
+                Intent selintent = new Intent(FunctionActivity.this,SelfActivity.class);
+                selintent.putExtra("role",role);
+                selintent.putExtra("name",name);
+                startActivity(selintent);
+                break;
             default:
                 break;
         }

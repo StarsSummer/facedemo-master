@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -68,6 +70,8 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
     private HListView mHListView;
     private RegisterViewAdapter mRegisterViewAdapter;
     private AFR_FSDKFace mAFR_FSDKFace;
+
+    private MySqliteHelper helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -286,6 +290,7 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
                                 public void onClick(DialogInterface dialog, int which) {
                                     if (mEditText.getText().toString().length() > 0) {
                                         ((Application) RegisterActivity.this.getApplicationContext()).mFaceDB.addFace(mEditText.getText().toString(),mSpinner.getSelectedItem().toString(), mAFR_FSDKFace);
+                                        Insertsql(mEditText.getText().toString(),mSpinner.getSelectedItem().toString());
                                     } else {
                                         Toast.makeText(RegisterActivity.this, "名字不能为空，请重新输入。", Toast.LENGTH_SHORT).show();
                                     }
@@ -314,10 +319,37 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
         }
     }
 
+    public void Insertsql(String name,String role){
+        String names;
+        String roles;
+        boolean userflag = true;
+        helper = new MySqliteHelper(getApplicationContext());
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String sql1 = "select * from users";
+        Cursor cursor = db.rawQuery(sql1,null);
+        while (cursor.moveToNext()){
+            names=cursor.getString(1);
+            roles=cursor.getString(2);
+            if(name.equals(names)){
+                Toast.makeText(this, "已存在此用户，请重新注册", Toast.LENGTH_SHORT).show();
+                userflag =false;
+                break;
+            }
+            userflag = true;
+        }
+        if(userflag == true){
+            String sql2 ="insert into users(name,role) values ('\"+name+\"','\"+role+\"')";
+            db.execSQL(sql2);
+            Toast.makeText(this, "注册成功！", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
     class Holder {
         ExtImageView siv;
         TextView tv;
     }
+
 
     class RegisterViewAdapter extends BaseAdapter implements AdapterView.OnItemClickListener {
         Context mContext;
