@@ -1,6 +1,7 @@
 package com.zeroingin.x.facedemo;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -48,6 +49,7 @@ public class DetecterActivity extends Activity implements OnCameraListener, View
     private CameraSurfaceView mSurfaceView;
     private CameraGLSurfaceView mGLSurfaceView;
     private Camera mCamera;
+    private boolean once = true;
 
     AFT_FSDKVersion version = new AFT_FSDKVersion();
     AFT_FSDKEngine engine = new AFT_FSDKEngine();
@@ -65,6 +67,7 @@ public class DetecterActivity extends Activity implements OnCameraListener, View
         @Override
         public void run() {
             mTextView.setAlpha(0.5f);
+            mTextView2.setAlpha(0.5f);
             mImageView.setImageAlpha(128);
         }
     };
@@ -89,9 +92,10 @@ public class DetecterActivity extends Activity implements OnCameraListener, View
             if (mImageNV21 != null) {
                 AFR_FSDKError error = engine.AFR_FSDK_ExtractFRFeature(mImageNV21, mWidth, mHeight, AFR_FSDKEngine.CP_PAF_NV21, mAFT_FSDKFace.getRect(), mAFT_FSDKFace.getDegree(), result);
                 Log.d(TAG, "Face=" + result.getFeatureData()[0] + "," + result.getFeatureData()[1] + "," + result.getFeatureData()[2] + "," + error.getCode());
-                AFR_FSDKMatching score = new AFR_FSDKMatching();
+                final AFR_FSDKMatching score = new AFR_FSDKMatching();
                 float max = 0.0f;
                 String name = null;
+                String status = null;
                 for (FaceDB.FaceRegist fr : mResgist) {
                     for (AFR_FSDKFace face : fr.mFaceList) {
                         error = engine.AFR_FSDK_FacePairMatching(result, face, score);
@@ -99,6 +103,7 @@ public class DetecterActivity extends Activity implements OnCameraListener, View
                         if (max < score.getScore()) {
                             max = score.getScore();
                             name = fr.mName;
+                            status = fr.mStatus;
                         }
                     }
                 }
@@ -120,6 +125,7 @@ public class DetecterActivity extends Activity implements OnCameraListener, View
                     final float max_score = max;
                     Log.d(TAG, "fit Score:" + max + ", NAME:" + name);
                     final String mNameShow = name;
+                    final String mStatusShow = status;
                     mHandler.removeCallbacks(hide);
                     mHandler.post(new Runnable() {
                         @Override
@@ -131,14 +137,34 @@ public class DetecterActivity extends Activity implements OnCameraListener, View
                             mTextView1.setVisibility(View.VISIBLE);
                             mTextView1.setText("置信度：" + (float) ((int) (max_score * 1000)) / 1000.0);
                             mTextView1.setTextColor(Color.RED);
+                            mTextView2.setVisibility(View.VISIBLE);
+                            mTextView2.setAlpha(1.0f);
+                            mTextView2.setText(mStatusShow);
+                            mTextView2.setTextColor(Color.RED);
                             mImageView.setRotation(mCameraRotate);
                             if (mCameraMirror) {
                                 mImageView.setScaleY(-1);
                             }
                             mImageView.setImageAlpha(255);
                             mImageView.setImageBitmap(bmp);
+
                         }
                     });
+                    try{
+                        Thread.sleep(1000);
+                        if(once == true){
+                            once = false;
+                            String role = mStatusShow;
+                            Intent roleintent = new Intent(DetecterActivity.this, FunctionActivity.class);
+                            roleintent.putExtra("role",role);
+                            roleintent.putExtra("name",mNameShow);
+                            startActivity(roleintent);
+                            finish();
+                        }
+                    }catch (InterruptedException e){
+
+                    }
+
                 } else {
                     final String mNameShow = "未识别";
                     DetecterActivity.this.runOnUiThread(new Runnable() {
@@ -146,6 +172,7 @@ public class DetecterActivity extends Activity implements OnCameraListener, View
                         public void run() {
                             mTextView.setAlpha(1.0f);
                             mTextView1.setVisibility(View.INVISIBLE);
+                            mTextView2.setVisibility(View.INVISIBLE);
                             mTextView.setText(mNameShow);
                             mTextView.setTextColor(Color.RED);
                             mImageView.setImageAlpha(255);
@@ -171,6 +198,7 @@ public class DetecterActivity extends Activity implements OnCameraListener, View
 
     private TextView mTextView;
     private TextView mTextView1;
+    private TextView mTextView2;
     private ImageView mImageView;
 
     /* (non-Javadoc)
@@ -203,6 +231,8 @@ public class DetecterActivity extends Activity implements OnCameraListener, View
         mTextView.setText("");
         mTextView1 = (TextView) findViewById(R.id.textView1);
         mTextView1.setText("");
+        mTextView2 = (TextView) findViewById(R.id.textView2);
+        mTextView.setText("");
 
         mImageView = (ImageView) findViewById(R.id.imageView);
 

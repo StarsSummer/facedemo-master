@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +63,7 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
     private Rect dst = new Rect();
     private Thread view;
     private EditText mEditText;
+    private Spinner mSpinner;
     private ExtImageView mExtImageView;
     private HListView mHListView;
     private RegisterViewAdapter mRegisterViewAdapter;
@@ -271,6 +273,7 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
                     View layout = inflater.inflate(R.layout.dialog_register, null);
                     mEditText = (EditText) layout.findViewById(R.id.editview);
                     mEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
+                    mSpinner = (Spinner) layout.findViewById(R.id.spinnerview);
                     mExtImageView = (ExtImageView) layout.findViewById(R.id.extimageview);
                     mExtImageView.setImageBitmap((Bitmap) msg.obj);
                     final Bitmap face = (Bitmap) msg.obj;
@@ -282,7 +285,7 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     if (mEditText.getText().toString().length() > 0) {
-                                        ((Application) RegisterActivity.this.getApplicationContext()).mFaceDB.addFace(mEditText.getText().toString(), mAFR_FSDKFace);
+                                        ((Application) RegisterActivity.this.getApplicationContext()).mFaceDB.addFace(mEditText.getText().toString(),mSpinner.getSelectedItem().toString(), mAFR_FSDKFace);
                                     } else {
                                         Toast.makeText(RegisterActivity.this, "名字不能为空，请重新输入。", Toast.LENGTH_SHORT).show();
                                     }
@@ -372,9 +375,10 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Log.d("onItemClick", "onItemClick = " + position + "pos=" + mHListView.getScroll());
             final String name = ((Application) mContext.getApplicationContext()).mFaceDB.mRegister.get(position).mName;
+            final String status = ((Application) mContext.getApplicationContext()).mFaceDB.mRegister.get(position).mStatus;
             final int count = ((Application) mContext.getApplicationContext()).mFaceDB.mRegister.get(position).mFaceList.size();
             new AlertDialog.Builder(RegisterActivity.this)
-                    .setTitle("删除注册名:" + name)
+                    .setTitle("删除注册名:" + name + "-" +status)
                     .setMessage("包含:" + count + "个注册人脸特征信息")
                     .setIcon(android.R.drawable.ic_dialog_info)
                     .setPositiveButton("确定", new DialogInterface.OnClickListener() {

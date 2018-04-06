@@ -38,10 +38,12 @@ public class FaceDB {
 
     class FaceRegist {
         String mName;
+        String mStatus;
         List<AFR_FSDKFace> mFaceList;
 
-        public FaceRegist(String name) {
+        public FaceRegist(String name,String status) {
             mName = name;
+            mStatus = status;
             mFaceList = new ArrayList<>();
         }
     }
@@ -96,7 +98,7 @@ public class FaceDB {
             if (version_saved != null) {
                 for (String name = bos.readString(); name != null; name = bos.readString()) {
                     if (new File(mDBPath + "/" + name + ".data").exists()) {
-                        mRegister.add(new FaceRegist(new String(name)));
+                        mRegister.add(new FaceRegist(new String(name.split("|")[0]),new String(name.split("|")[1])));
                     }
                 }
             }
@@ -143,7 +145,7 @@ public class FaceDB {
     }
 
     // TODO: 2017/10/4 待完善注册时先对比人脸库中是否含有同一个人 而非使用名字将特征放在一起
-    public void addFace(String name, AFR_FSDKFace face) {
+    public void addFace(String name,String status, AFR_FSDKFace face) {
         try {
             //check if already registered.
             boolean add = true;
@@ -164,7 +166,7 @@ public class FaceDB {
             }
 
             if (add) { // not registered.
-                FaceRegist frface = new FaceRegist(name);
+                FaceRegist frface = new FaceRegist(name,status);
                 frface.mFaceList.add(face);
                 mRegister.add(frface);
             }
@@ -175,7 +177,7 @@ public class FaceDB {
                     FileOutputStream fs = new FileOutputStream(mDBPath + "/face.txt", true);
                     ExtOutputStream bos = new ExtOutputStream(fs);
                     for (FaceRegist frface : mRegister) {
-                        bos.writeString(frface.mName);
+                        bos.writeString(frface.mName + "|" + frface.mStatus);
                     }
                     bos.close();
                     fs.close();
