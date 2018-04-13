@@ -4,9 +4,14 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.net.Socket;
 
 /**
  * Created by 111 on 2018/4/5.
@@ -29,6 +34,11 @@ public class FunctionActivity extends Activity implements View.OnClickListener{
         Intent roleintent = getIntent();
         role = roleintent.getStringExtra("role");
         name = roleintent.getStringExtra("name");
+
+
+
+
+
         Toast.makeText(this,role,Toast.LENGTH_LONG).show();
         changefunc(role);
         View v = this.findViewById(R.id.Button_kids);
@@ -46,6 +56,12 @@ public class FunctionActivity extends Activity implements View.OnClickListener{
     @Override
     public void onClick(View v) {
         switch (v.getId()){
+            case R.id.Button_kids:
+                Intent pickintent = new Intent(FunctionActivity.this,PickupActivity.class);
+                pickintent.putExtra("name",name);
+                pickintent.putExtra("role",role);
+                startActivity(pickintent);
+                break;
             case R.id.Button_chat:
                 Intent chatintent = new Intent(FunctionActivity.this,ChatActivity.class);
                 chatintent.putExtra("name",name);
@@ -88,4 +104,6 @@ public class FunctionActivity extends Activity implements View.OnClickListener{
             btn_veri.setText("增加临时接送人");
         }
     }
+
+
 }

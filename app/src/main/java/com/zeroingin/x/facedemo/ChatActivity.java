@@ -1,180 +1,114 @@
 package com.zeroingin.x.facedemo;
 
-import android.app.Activity;
+import android.os.Handler;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.URI;
-import java.net.URLEncoder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 
 /**
  * Created by 111 on 2018/4/5.
  */
 
-public class ChatActivity extends Activity {
-    private static final String TAG = ChatActivity.class.getSimpleName();
-
+public class ChatActivity extends AppCompatActivity {
+    private RecyclerView rv;
     private Button btnSend;
     private EditText inputMsg;
-    //private WebSocketClient client;
+    private Socket socket;
     private MessagesListAdapter adapter;
-    private List<Message> listMessages;
-    private ListView listViewMessages;
-    private ChatUtils utils;
-
+    private ArrayList<Message> listMessages;
     private String name = null;
-    private static final String TAG_SELF = "self", TAG_NEW = "new", TAG_MESSAGE = "message", TAG_EXIT = "exit";
 
     @Override
-    protected void onCreate(Bundle savedInstacneState){
+    protected void onCreate(Bundle savedInstacneState) {
         super.onCreate(savedInstacneState);
         setContentView(R.layout.activity_chat);
         btnSend = (Button) findViewById(R.id.btnSend);
         inputMsg = (EditText) findViewById(R.id.inputMsg);
-        listViewMessages = (ListView) findViewById(R.id.list_view_messages);
-
-        utils = new ChatUtils(getApplicationContext());
+        rv = (RecyclerView) findViewById(R.id.list_view_messages);
+        listMessages = new ArrayList<>();
+        adapter = new MessagesListAdapter(this);
+        final android.os.Handler handler = new MyHandler();
 
         Intent i = getIntent();
-        name = i.getStringExtra("naem");
+        name = i.getStringExtra("name");
 
-//        btnSend.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                sendMessageToServer(utils.getSendMessageJSON(inputMsg.getText().toString()));
-//                inputMsg.setText("");
-//            }
-//        });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    socket = new Socket("10.206.11.77", 32100);
+                    InputStream inputStream = socket.getInputStream();
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = inputStream.read(buffer)) != -1) {
+                        String data = new String(buffer, 0, len);
+                        android.os.Message message = android.os.Message.obtain();
+                        message.what = 1;
+                        message.obj = data;
+                        handler.sendMessage(message);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
 
-        listMessages = new ArrayList<Message>();
-        adapter = new MessagesListAdapter(this,listMessages);
-        listViewMessages.setAdapter(adapter);
-
-//        client = new WebSocketClient(URI.create(WsConfig.URL_WEBSOCKET + URLEncoder.encode(name)),new WebSocketClient.Listener(){
-//            @Override
-//            public void onConnect(){
-//
-//            }
-//
-//            @Override
-//            public void onMessage(String message){
-//                parseMessage(message);
-//            }
-//
-//            @Override
-//            public void onMessage(byte[] data){
-//                parseMessage(bytesToHex(data));
-//            }
-//
-//            @Override
-//            public void onDisconnect(int code,String reason){
-//                String message = String.format(Locale.CHINA,"disconnect!",code,reason);
-//                showToast(message);
-//                utils.storeSessionId(null);
-//            }
-//
-//            @Override
-//            public void onError(Exception error){
-//                showToast("Error!");
-//            }
-//        },null);
-//        client.connect();
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String data = inputMsg.getText().toString();
+                inputMsg.setText("");
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            OutputStream outputStream = socket.getOutputStream();
+                            outputStream.write((socket.getLocalPort() + "//" + data + "//" + name).getBytes("utf-8"));
+                            outputStream.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
+            }
+        });
     }
 
-//    private void sendMessageToServer(String message){
-//        if(client!=null && client.isConnected()){
-//            client.send(message);
-//        }
-//    }
-
-    private void parseMessage(final String msg){
-        try{
-            JSONObject jObj = new JSONObject(msg);
-            String flag = jObj.getString("flag");
-            if(flag.equalsIgnoreCase(TAG_SELF)){
-                String sessionId = jObj.getString("sessionId");
-                utils.storeSessionId(sessionId);
-            }else if(flag.equalsIgnoreCase(TAG_NEW)){
-                String name = jObj.getString("name");
-                String message = jObj.getString("message");
-                String onlineCount = jObj.getString("onlineCount");
-                showToast(name+message+".Currently" + onlineCount + " people online");
-            }else if (flag.equalsIgnoreCase(TAG_MESSAGE)) {
-                // if the flag is 'message', new message received
-                String fromName = name;
-                String message = jObj.getString("message");
-                String sessionId = jObj.getString("sessionId");
-                boolean isSelf = true;
-
-                if (!sessionId.equals(utils.getSessionId())) {
-                    fromName = jObj.getString("name");
-                    isSelf = false;
+    private class MyHandler extends Handler{
+        @Override
+        public void handleMessage(android.os.Message msg){
+            super.handleMessage(msg);
+            if(msg.what == 1){
+                int localPort = socket.getLocalPort();
+                String[] split = ((String) msg.obj).split("//");
+                if(split[0].equals(localPort + "")){
+                    Message message = new Message(split[1],"我",2);
+                    listMessages.add(message);
+                }else {
+                    Message message = new Message(split[1],split[2].toString(),1);
+                    listMessages.add(message);
                 }
 
-                Message m = new Message(fromName, message, isSelf);
-
-                appendMessage(m);
-
-            } else if (flag.equalsIgnoreCase(TAG_EXIT)) {
-                String name = jObj.getString("name");
-                String message = jObj.getString("message");
-
-                showToast(name + message);
+                adapter.setData(listMessages);
+                rv.setAdapter(adapter);
+                LinearLayoutManager manager = new LinearLayoutManager(ChatActivity.this,LinearLayoutManager.VERTICAL,false);
+                rv.setLayoutManager(manager);
             }
-        }catch (JSONException e){
-            e.printStackTrace();
         }
     }
-//
-//    @Override
-//    protected void onDestroy(){
-//        super.onDestroy();
-//        if(client != null && client.isConnected()){
-//            client.disconnect();
-//        }
-//    }
-
-    private void appendMessage(final Message m){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                listMessages.add(m);
-                adapter.notifyDataSetChanged();
-            }
-        });
-    }
-
-    private void showToast(final String message){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(),message,Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
-
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
-    }
-
 }

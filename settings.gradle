@@ -1,1 +1,1 @@
-include ':app'/*, ':android-extend'*/
+include ':app', ':chatserver'/*, ':android-extend'*/

@@ -33,6 +33,7 @@
         <activity android:name=".ChatActivity" android:screenOrientation="portrait" />
         <activity android:name=".AnnoActivity" android:screenOrientation="portrait" />
         <activity android:name=".SelfActivity" android:screenOrientation="portrait" />
+        <activity android:name=".PickupActivity" android:screenOrientation="portrait" />
 
     </application>
 

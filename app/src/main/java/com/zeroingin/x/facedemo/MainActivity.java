@@ -14,10 +14,23 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
+
+import com.arcsoft.facerecognition.AFR_FSDKFace;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+import java.util.List;
 
 public class MainActivity extends Activity implements OnClickListener {
     private final String TAG = this.getClass().toString();
@@ -28,7 +41,14 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private Uri mPath;
 
+
+    private Socket socket;
+    private final int port =9999;
+
+    private AFR_FSDKFace mAFR_FSDKFace;
     private MySqliteHelper helper;
+    private String longstr="";
+    private int l,r;
 
     /* (non-Javadoc)
      * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -42,6 +62,29 @@ public class MainActivity extends Activity implements OnClickListener {
         v.setOnClickListener(this);
         v = this.findViewById(R.id.button2);
         v.setOnClickListener(this);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    socket = new Socket("10.206.11.73", port);
+                    Log.i("info","Server connected!");
+                    InputStream inputStream = socket.getInputStream();
+                    byte[] buffer = new byte[31457280];
+                    int len;
+                    while ((len = inputStream.read(buffer))!=-1){
+                        String response = new String(buffer,0,len);
+                        r=response.length();
+                        longstr = longstr+response;
+                        l=longstr.length();
+                        response="";
+                    }
+                    parseJSONWithJSONObject(longstr);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     /* (non-Javadoc)
@@ -252,5 +295,42 @@ public class MainActivity extends Activity implements OnClickListener {
         Cursor cursor = db.rawQuery(sql1, null);
         return false;
     }
+
+    private void parseJSONWithJSONObject(String jsonData){
+        try{
+           // helper = new MySqliteHelper(getApplicationContext());
+            //SQLiteDatabase db = helper.getWritableDatabase();
+           // String sql ="insert into users(name,role) values ('\"+name+\"','\"+role+\"')";
+//            Gson gson = new Gson();
+//            List<UserFace> faces= gson.fromJson(jsonData,new TypeToken<List<UserFace>>(){}.getType());
+//            for(UserFace userFace: faces){
+//                String id =userFace.getId();
+//                String name = userFace.getName();
+//                String role = userFace.getRole();
+//                byte[] mfeature = userFace.getFeature();
+//           //     db.execSQL(sql);
+//                mAFR_FSDKFace.setFeatureData(mfeature);
+//                ((Application) MainActivity.this.getApplicationContext()).mFaceDB.addFace(name,role,mAFR_FSDKFace);
+//            }
+                JSONArray jsonArray=new JSONArray(jsonData);
+                for(int j=0;j<jsonArray.length();j++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(j);
+                    String id =jsonObject.getString("ID");
+                    String name = jsonObject.getString("name");
+                    String role = jsonObject.getString("role");
+                    String face = jsonObject.getString("feature");
+                    byte[] mfeature = Base64.decode(face,Base64.DEFAULT);
+                    AFR_FSDKFace newface = new AFR_FSDKFace(mfeature);
+                    ((Application) MainActivity.this.getApplicationContext()).mFaceDB.addFace(name,role,newface);
+                }
+
+                Log.i("info","Sql completed!");
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
 }
 

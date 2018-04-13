@@ -5,41 +5,42 @@ package com.zeroingin.x.facedemo;
  */
 
 public class Message {
-    private String fromName,message;
-    private boolean isSelf;
+    private String data;
+    private String name;
+    private int number;
 
-    public String getFromName() {
-        return fromName;
+    public String getData() {
+        return data;
     }
 
-    public void setFromName(String fromName) {
-        this.fromName = fromName;
+    public void setData(String data) {
+        this.data = data;
     }
 
-    public String getMessage() {
-        return message;
+    public String getName() {
+        return name;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public boolean isSelf() {
-        return isSelf;
+    public int getNumber() {
+        return number;
     }
 
-    public void setSelf(boolean self) {
-        isSelf = self;
+    public void setNumber(int number) {
+        this.number = number;
     }
 
     public Message(){
 
     }
 
-    public Message(String fromName,String message,boolean isSelf){
-        this.fromName = fromName;
-        this.message = message;
-        this.isSelf = isSelf;
+    public Message(String data,String name,int number){
+        this.data = data;
+        this.name = name;
+        this.number = number;
     }
 
 

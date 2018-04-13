@@ -2,57 +2,95 @@ package com.zeroingin.x.facedemo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by 111 on 2018/4/5.
  */
 
-public class MessagesListAdapter extends BaseAdapter {
+public class MessagesListAdapter extends RecyclerView.Adapter {
     private Context context;
-    private List<Message> messagesItems;
+    private List<Message> data;
+    private static final int MSGTYPE1 = 1;
+    private static final int MSGTYPE2 = 2;
 
-    public MessagesListAdapter(Context context, List<Message> navDrawerItems) {
+    public MessagesListAdapter(Context context){
         this.context = context;
-        this.messagesItems = navDrawerItems;
+    }
+
+    public void setData(ArrayList<Message> data){
+        this.data = data;
+        notifyDataSetChanged();
     }
 
     @Override
-    public int getCount() {
-        return messagesItems.size();
+    public int getItemViewType(int position) {
+        return data.get(position).getNumber();
     }
 
     @Override
-    public Object getItem(int position) {
-        return messagesItems.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent){
-        Message m = messagesItems.get(position);
-        LayoutInflater mInflater =(LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        if (messagesItems.get(position).isSelf()){
-            convertView = mInflater.inflate(R.layout.list_item_message_right,null);
-        }else {
-            convertView = mInflater.inflate(R.layout.list_item_message_left,null);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        RecyclerView.ViewHolder holder = null;
+        switch (viewType){
+            case MSGTYPE1:
+                View view = LayoutInflater.from(context).inflate(R.layout.list_item_message_left,parent,false);
+                holder = new OtherViewHolder(view);
+                break;
+            case MSGTYPE2:
+                View viewo = LayoutInflater.from(context).inflate(R.layout.list_item_message_right,parent,false);
+                holder = new SelfViewHolder(viewo);
+                break;
         }
+        return holder;
+    }
 
-        TextView lblFrom = (TextView) convertView.findViewById(R.id.lblMsgFrom);
-        TextView txtMsg = (TextView) convertView.findViewById(R.id.txtMsg);
-        txtMsg.setText(m.getMessage());
-        lblFrom.setText(m.getFromName());
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        int viewtype = getItemViewType(position);
+        switch (viewtype){
+            case MSGTYPE1:
+                OtherViewHolder otherViewHolder = (OtherViewHolder) holder;
+                otherViewHolder.nametext.setText(data.get(position).getName());
+                otherViewHolder.msgtext.setText(data.get(position).getData());
+                break;
+            case MSGTYPE2:
+                SelfViewHolder selfViewHolder = (SelfViewHolder) holder;
+                selfViewHolder.nametext.setText(data.get(position).getName());
+                selfViewHolder.msgtext.setText(data.get(position).getData());
+                break;
+        }
+    }
 
-        return convertView;
+    @Override
+    public int getItemCount() {
+        return data != null && data.size() > 0 ? data.size() : 0 ;
+    }
+
+    class SelfViewHolder extends RecyclerView.ViewHolder{
+        private TextView nametext;
+        private TextView msgtext;
+        public SelfViewHolder(View msgview){
+            super(msgview);
+            nametext = (TextView) msgview.findViewById(R.id.lblMsgFrom);
+            msgtext = (TextView) msgview.findViewById(R.id.txtMsg);
+        }
+    }
+
+    class OtherViewHolder extends RecyclerView.ViewHolder{
+        private TextView nametext;
+        private TextView msgtext;
+        public OtherViewHolder(View msgview){
+            super(msgview);
+            nametext = (TextView) msgview.findViewById(R.id.lblMsgFrom);
+            msgtext = (TextView) msgview.findViewById(R.id.txtMsg);
+        }
     }
 }

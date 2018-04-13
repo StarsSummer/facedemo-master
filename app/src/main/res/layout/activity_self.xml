@@ -20,21 +20,11 @@
             android:layout_width="200dp"
             android:layout_height="50dp"
             android:layout_marginLeft="50dp"
-            android:layout_marginTop="50dp"
+            android:layout_centerVertical="true"
             android:text="家长："
             android:textSize="20dp"
             android:textColor="@color/colorWhite"
             android:layout_toRightOf="@+id/head_circle"/>
-        <TextView
-            android:id="@+id/name_child"
-            android:layout_width="200dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="50dp"
-            android:text="孩子："
-            android:textSize="20dp"
-            android:textColor="@color/colorWhite"
-            android:layout_toRightOf="@+id/head_circle"
-            android:layout_below="@+id/name_parent"/>
     </RelativeLayout>
     <GridLayout
         android:layout_marginTop="50dp"
@@ -103,8 +93,7 @@
             android:layout_columnWeight="1"
             android:layout_rowWeight="1"
             android:background="#8eded5"
-            android:text="临时接送
-管理"
+            android:text="临时接送人"
             android:textColor="@color/colorWhite"
             android:textSize="20dp"/>
     </GridLayout>

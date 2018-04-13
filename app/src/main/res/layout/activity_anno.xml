@@ -22,7 +22,7 @@
         android:background="@null"
         android:divider="@null"
         android:transcriptMode="alwaysScroll"
-        android:stackFromBottom="true">
+        android:stackFromBottom="false">
     </ListView>
 
     <Button
