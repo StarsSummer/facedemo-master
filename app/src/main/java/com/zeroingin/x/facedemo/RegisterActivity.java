@@ -14,6 +14,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.InputFilter;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
@@ -39,6 +40,12 @@ import com.guo.android_extend.image.ImageConverter;
 import com.guo.android_extend.widget.ExtImageView;
 import com.guo.android_extend.widget.HListView;
 
+import org.json.JSONObject;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,6 +71,7 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
     private Rect src = new Rect();
     private Rect dst = new Rect();
     private Thread view;
+    private EditText mPhoneText;
     private EditText mEditText;
     private Spinner mSpinner;
     private ExtImageView mExtImageView;
@@ -72,6 +80,10 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
     private AFR_FSDKFace mAFR_FSDKFace;
 
     private MySqliteHelper helper;
+
+    private Socket socket;
+
+    private byte[] regmsg = new byte[16777216];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -269,12 +281,14 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
 
     class UIHandler extends android.os.Handler {
         @Override
-        public void handleMessage(Message msg) {
+        public void handleMessage(final Message msg) {
             super.handleMessage(msg);
             if (msg.what == MSG_CODE) {
                 if (msg.arg1 == MSG_EVENT_REG) {
                     LayoutInflater inflater = LayoutInflater.from(RegisterActivity.this);
                     View layout = inflater.inflate(R.layout.dialog_register, null);
+                    mPhoneText = (EditText) layout.findViewById(R.id.phoneview);
+                    mPhoneText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
                     mEditText = (EditText) layout.findViewById(R.id.editview);
                     mEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
                     mSpinner = (Spinner) layout.findViewById(R.id.spinnerview);
@@ -289,8 +303,43 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     if (mEditText.getText().toString().length() > 0) {
-                                        ((Application) RegisterActivity.this.getApplicationContext()).mFaceDB.addFace(mEditText.getText().toString(),mSpinner.getSelectedItem().toString(), mAFR_FSDKFace);
+                                        ((Application) RegisterActivity.this.getApplicationContext()).mFaceDB.addFace(mPhoneText.getText().toString(),mEditText.getText().toString(),mSpinner.getSelectedItem().toString(), mAFR_FSDKFace);
                                         Insertsql(mEditText.getText().toString(),mSpinner.getSelectedItem().toString());
+
+                                        JSONObject obj = new JSONObject();
+                                        try{
+                                            String feature = new String(mAFR_FSDKFace.getFeatureData(),"ISO-8859-1");
+                                            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                                            face.compress(Bitmap.CompressFormat.PNG,100,bout);
+                                            long ilen = bout.size();
+                                            obj.put("opt","reg");
+                                            obj.put("id",mPhoneText.getText().toString());
+                                            obj.put("name",mEditText.getText().toString());
+                                            obj.put("role",mSpinner.getSelectedItem().toString());
+                                            obj.put("feature",feature);
+                                            obj.put("image",Base64.encodeToString(bout.toByteArray(), 0));
+                                        }catch (Exception e){
+
+                                        }
+                                        regmsg = obj.toString().getBytes();
+                                        new Thread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                try{
+                                                    socket = new Socket("10.206.11.73", 9999);
+                                                    Log.i("info","Server connected!");
+                                                    OutputStream outputStream = socket.getOutputStream();
+                                                    int len = regmsg.length;
+                                                    outputStream.write(regmsg,0,len);
+                                                    outputStream.flush();
+                                                    Log.i("info","SQL sended");
+                                                    
+
+                                                }catch (Exception e){
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }).start();
                                     } else {
                                         Toast.makeText(RegisterActivity.this, "名字不能为空，请重新输入。", Toast.LENGTH_SHORT).show();
                                     }

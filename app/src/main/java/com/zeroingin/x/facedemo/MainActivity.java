@@ -80,6 +80,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         response="";
                     }
                     parseJSONWithJSONObject(longstr);
+                    socket.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -321,7 +322,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     String face = jsonObject.getString("feature");
                     byte[] mfeature = Base64.decode(face,Base64.DEFAULT);
                     AFR_FSDKFace newface = new AFR_FSDKFace(mfeature);
-                    ((Application) MainActivity.this.getApplicationContext()).mFaceDB.addFace(name,role,newface);
+                    ((Application) MainActivity.this.getApplicationContext()).mFaceDB.addFace(id,name,role,newface);
                 }
 
                 Log.i("info","Sql completed!");

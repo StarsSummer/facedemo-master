@@ -1,6 +1,7 @@
 package com.zeroingin.x.facedemo;
 
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Base64;
 import android.util.Log;
 
 import com.arcsoft.facerecognition.AFR_FSDKEngine;
@@ -10,11 +11,16 @@ import com.arcsoft.facerecognition.AFR_FSDKVersion;
 import com.guo.android_extend.java.ExtInputStream;
 import com.guo.android_extend.java.ExtOutputStream;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,9 +46,11 @@ public class FaceDB {
     class FaceRegist {
         String mName;
         String mStatus;
+        String mId;
         List<AFR_FSDKFace> mFaceList;
 
-        public FaceRegist(String name,String status) {
+        public FaceRegist(String mId,String name,String status) {
+            mId = mId;
             mName = name;
             mStatus = status;
             mFaceList = new ArrayList<>();
@@ -99,7 +107,7 @@ public class FaceDB {
             if (version_saved != null) {
                 for (String name = bos.readString(); name != null; name = bos.readString()) {
                     if (new File(mDBPath + "/" + name + ".data").exists()) {
-                        mRegister.add(new FaceRegist(new String(name.split("|")[0]),new String(name.split("|")[1])));
+                        mRegister.add(new FaceRegist(new String(name.split("|")[0]),new String(name.split("|")[1]),new String(name.split("|")[2])));
                     }
                 }
             }
@@ -146,7 +154,7 @@ public class FaceDB {
     }
 
     // TODO: 2017/10/4 待完善注册时先对比人脸库中是否含有同一个人 而非使用名字将特征放在一起
-    public void addFace(String name,String status, AFR_FSDKFace face) {
+    public void addFace(String id,String name,String status, AFR_FSDKFace face) {
         try {
             //check if already registered.
 
@@ -169,7 +177,8 @@ public class FaceDB {
             }
 
             if (add) { // not registered.
-                FaceRegist frface = new FaceRegist(name,status);
+                FaceRegist frface = new FaceRegist(id,name,status);
+
                 frface.mFaceList.add(face);
                 mRegister.add(frface);
 
