@@ -31,9 +31,10 @@
         <activity android:name=".DetecterActivity" android:screenOrientation="portrait" />
         <activity android:name=".FunctionActivity" android:screenOrientation="portrait" />
         <activity android:name=".ChatActivity" android:screenOrientation="portrait" />
-        <activity android:name=".AnnoActivity" android:screenOrientation="portrait" />
+        <activity android:name=".AnnoActivity" android:screenOrientation="portrait" android:launchMode="singleTask"/>
         <activity android:name=".SelfActivity" android:screenOrientation="portrait" />
         <activity android:name=".PickupActivity" android:screenOrientation="portrait" />
+        <activity android:name=".SendAnnoActivity" android:screenOrientation="portrait" />
 
     </application>
 

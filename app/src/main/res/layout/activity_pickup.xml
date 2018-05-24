@@ -23,14 +23,17 @@
             android:textSize="20dp"
             android:textStyle="bold"/>
     </LinearLayout>
-    <ListView
-        android:id="@+id/list_child_arrive"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@null"
-        android:divider="@null"
-        android:transcriptMode="alwaysScroll"
-        android:stackFromBottom="false">
-    </ListView>
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ListView
+            android:id="@+id/list_child_arrive"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@null">
+        </ListView>
+    </android.support.v4.widget.SwipeRefreshLayout>
+
 </LinearLayout>

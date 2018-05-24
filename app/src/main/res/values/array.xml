@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="spname">
-        <item>教师</item>
-        <item>工作人员 </item>
         <item>家长</item>
+        <item>教师</item>
     </string-array>
 </resources>

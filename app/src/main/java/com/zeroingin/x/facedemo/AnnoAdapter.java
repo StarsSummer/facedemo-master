@@ -29,8 +29,12 @@ public class AnnoAdapter extends ArrayAdapter<Announcement> {
         View view = LayoutInflater.from(getContext()).inflate(annoid,null);
         TextView headtext = (TextView) view.findViewById(R.id.anno_head);
         TextView detailtext = (TextView) view.findViewById(R.id.anno_detail);
+        TextView datetext = (TextView) view.findViewById(R.id.anno_time);
+        TextView nametext = (TextView) view.findViewById(R.id.anno_publisher);
         headtext.setText(anno.getHeadtext());
         detailtext.setText(anno.getDetailtext());
+        datetext.setText(anno.getDatetext());
+        nametext.setText(anno.getNametext());
         return view;
     }
 

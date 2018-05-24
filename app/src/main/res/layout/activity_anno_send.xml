@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FDFCF9">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dip"
+        android:gravity="center"
+        android:textSize="23dip"
+        android:textColor="#7BBFEA"
+        android:text="编辑新公告"/>
+    <EditText
+        android:id="@+id/send_anno_title"
+        android:layout_marginTop="25dip"
+        android:layout_width="match_parent"
+        android:layout_height="50dip"
+        android:hint="标题（必填）"
+        android:textSize="20dip"
+        android:paddingLeft="20dip"
+        android:background="@color/colorWhite"/>
+    <EditText
+        android:id="@+id/send_anno_detail"
+        android:layout_marginTop="25dip"
+        android:layout_width="match_parent"
+        android:layout_height="300dip"
+        android:hint="正文（必填）"
+        android:gravity="top"
+        android:textSize="20dip"
+        android:padding="20dip"
+        android:background="@color/colorWhite"/>
+    <Button
+        android:id="@+id/btn_anno_sure"
+        android:layout_marginTop="30dip"
+        android:layout_gravity="center_horizontal"
+        android:background="#7BBFEA"
+        android:layout_width="300dip"
+        android:layout_height="50dip"
+        android:textColor="@color/colorWhite"
+        android:textSize="25dip"
+        android:text="发 布"/>
+    <ProgressBar
+        android:id="@+id/anno_pro"
+        android:layout_width="match_parent"
+        android:layout_height="50dip"
+        android:layout_marginTop="30dip"
+        android:max="100"
+        android:progress="0"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        />
+
+</LinearLayout>

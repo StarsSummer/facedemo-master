@@ -18,6 +18,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.arcsoft.facerecognition.AFR_FSDKFace;
@@ -49,6 +50,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private MySqliteHelper helper;
     private String longstr="";
     private int l,r;
+    private Button invi;
 
     /* (non-Javadoc)
      * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -62,12 +64,14 @@ public class MainActivity extends Activity implements OnClickListener {
         v.setOnClickListener(this);
         v = this.findViewById(R.id.button2);
         v.setOnClickListener(this);
+        //invi = (Button) this.findViewById(R.id.button1);
+        //invi.setVisibility(View.INVISIBLE);
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    socket = new Socket("10.206.11.73", port);
+                    socket = new Socket("", port);
                     Log.i("info","Server connected!");
                     InputStream inputStream = socket.getInputStream();
                     byte[] buffer = new byte[31457280];

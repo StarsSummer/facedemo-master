@@ -326,7 +326,7 @@ public class RegisterActivity extends Activity implements SurfaceHolder.Callback
                                             @Override
                                             public void run() {
                                                 try{
-                                                    socket = new Socket("10.206.11.73", 9999);
+                                                    socket = new Socket("114.115.154.108", 9999);
                                                     Log.i("info","Server connected!");
                                                     OutputStream outputStream = socket.getOutputStream();
                                                     int len = regmsg.length;
